@@ -3,8 +3,8 @@
 Access policy for Weirdnet apps. It answers "may this peer do this to this resource?" the
 same way in every app.
 
-- **Two independent settings.** Visibility is `private` (only the owner, trusted peers and
-  members know it exists) or `public`. Access is `open` (no membership needed) or `gated`
+- **Two independent settings.** Visibility is `private` (only the owner and trusted peers
+  know it exists; members must be trusted too) or `public`. Access is `open` (no membership needed) or `gated`
   (a valid membership is needed). On the wire it is always `gated`; CLIs may also accept
   `members`, `member` and `closed`. New resources default to Private + Open.
 - **A shared permission core that apps extend.** The core is `read`, `members.list`,
@@ -45,7 +45,7 @@ assert_eq!(decide(&catalog, &roles, settings, &stranger, "files.read"), Decision
 | Step | Private | Public |
 | --- | --- | --- |
 | 1. Identity | revoked node: not found | revoked node: denied |
-| 2. Visibility | not the owner, not trusted, no membership: not found | continue |
+| 2. Visibility | not the owner and not trusted: not found (members must be trusted too) | continue |
 | 3. Membership (Gated) | no membership: not found | no membership: join first |
 | 4. Role | the role must allow it | the role must allow it |
 | 5. Transport | sealed | sealed if Gated, plain if Open |

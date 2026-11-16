@@ -6,8 +6,9 @@ Report problems privately to m3talsmith@gmail.com.
 
 - Requests go through the steps in a fixed order: identity, visibility, membership, role.
   A revoked node never gets past the first step.
-- A Private resource answers "not found" to anyone who isn't the owner, isn't trusted and
-  holds no valid membership, so its existence isn't revealed.
+- A Private resource answers "not found" to anyone who isn't the owner or on the trust
+  list, so its existence isn't revealed. A membership alone doesn't make it visible: its
+  members must be trusted too.
 - A Gated resource gives content only to valid members; on a Public resource, non-members
   see the listing and can ask to join.
 - Guests act only on Open resources, only under the guest role, and never get managing

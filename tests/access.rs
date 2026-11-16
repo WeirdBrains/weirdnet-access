@@ -57,13 +57,17 @@ fn enforcement_order() {
 
     // Member.
     for st in [s(Private, Gated), s(Public, Gated)] {
-        let (dec, _) = d(st, &member("user"), "files.read");
+        let (dec, _) = d(st, &Facts { trusted: true, ..member("user") }, "files.read");
         assert!(matches!(dec, Decision::Allow { actor: Actor::Member { .. }, transport: Transport::Sealed }), "{dec:?}");
     }
-    // A valid membership makes a Private resource visible without a trust-list entry.
-    assert!(matches!(d(s(Private, Open), &member("user"), "read").0, Decision::Allow { actor: Actor::Member { .. }, .. }));
-    // But a membership naming a role that is gone doesn't.
-    assert_eq!(d(s(Private, Gated), &member("gone"), "read"), (Decision::NotFound, Step::Visibility));
+    // A membership alone doesn't make a Private resource visible: members must be trusted too.
+    assert_eq!(d(s(Private, Open), &member("user"), "read"), (Decision::NotFound, Step::Visibility));
+    assert_eq!(d(s(Private, Gated), &member("user"), "files.read"), (Decision::NotFound, Step::Visibility));
+    assert!(matches!(d(s(Private, Open), &Facts { trusted: true, ..member("user") }, "read").0, Decision::Allow { actor: Actor::Member { .. }, .. }));
+    // On a Public resource a membership is enough.
+    assert!(matches!(d(s(Public, Gated), &member("user"), "files.read").0, Decision::Allow { .. }));
+    // A trusted user whose membership names a role that is gone is not a member.
+    assert_eq!(d(s(Private, Gated), &Facts { trusted: true, ..member("gone") }, "read"), (Decision::NotFound, Step::Membership));
     let tm = Facts { trusted: true, ..member("user") };
     assert!(matches!(d(s(Private, Gated), &tm, "files.read").0, Decision::Allow { .. }));
     assert_eq!(d(s(Private, Gated), &tm, "files.delete"), (Decision::Denied("the role does not allow this"), Step::Role));

@@ -2,8 +2,9 @@
 //!
 //! 1. **Identity.** Noise has authenticated the peer id; the app resolves it to a user
 //!    through the node cert in the peer's card. Revoked nodes are refused.
-//! 2. **Visibility.** Private: a user who isn't the owner, isn't trusted and holds no valid
-//!    membership gets "not found", which leaks nothing. Public: continue.
+//! 2. **Visibility.** Private: a user who isn't the owner and isn't on the trust list gets
+//!    "not found", which leaks nothing; a membership alone doesn't make a Private resource
+//!    visible. Public: continue.
 //! 3. **Membership.** Gated: a valid, unrevoked membership for this resource is needed
 //!    (Public + Gated non-members may see the listing and request to join). Open: continue.
 //! 4. **Role.** The actor's role must allow the action (implications and rank rules
@@ -102,8 +103,8 @@ pub fn decide_with_step(catalog: &Catalog, roles: &RoleSet, settings: Settings, 
     }
     let owner = facts.is_owner && facts.user.is_some();
     let member = facts.user.as_deref().zip(facts.membership_role.as_deref()).and_then(|(u, r)| roles.actor(u, r));
-    // 2. Visibility. A valid membership is the owner's say-so, so it counts like trust.
-    if private && !owner && member.is_none() && !(facts.trusted && facts.user.is_some()) {
+    // 2. Visibility. Members of a Private resource must be on the trust list too.
+    if private && !owner && !(facts.trusted && facts.user.is_some()) {
         return (Decision::NotFound, Step::Visibility);
     }
     // 3. Membership.
