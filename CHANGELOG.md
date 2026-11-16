@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - The shared permission core, app permissions and transitive implications.
 - Ranked roles with Muninn's rank rules, and the `owner_member` and `ranked` presets.
 - Owner, member and guest actors; guests never get managing permissions.
+- A private resource is visible only to its owner and trusted users: members must be on the trust list too.
 - `decide`: identity, visibility, membership, role, then sealed or plain transport.
 
 [Unreleased]: https://github.com/WeirdBrains/weirdnet-access/compare/6cf2e0f5a71feadb3f28fa2613ac0a79925b8b25...HEAD
