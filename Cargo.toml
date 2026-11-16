@@ -1,0 +1,20 @@
+[package]
+name = "weirdnet-access"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["m3talsmith <m3talsmith@gmail.com>"]
+license = "BSD-3-Clause"
+repository = "https://github.com/WeirdBrains/weirdnet-access"
+description = "Weirdnet access policy: Private/Public and Open/Gated as independent axes, a shared permission core apps extend, ranked configurable roles with implications, owner/member/guest actors, and the host-side enforcement order."
+readme = "README.md"
+keywords = ["access-control", "roles", "permissions", "weirdnet", "p2p"]
+categories = ["authentication", "network-programming"]
+include = ["src/**", "README.md", "LICENSE", "CHANGELOG.md", "SECURITY.md"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+serde_json = "1"
