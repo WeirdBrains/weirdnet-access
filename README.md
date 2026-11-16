@@ -13,7 +13,8 @@ same way in every app.
   `files.write`, which includes `files.read`), followed transitively. Cycles are refused.
 - **Ranked roles that users can change.** Each role has a name, a rank and permissions.
   The rank rules are Muninn's. Presets: `owner_member` (Morph) and `ranked`
-  (owner/admin/user/viewer, Muninn).
+  (owner/admin/user/viewer, Muninn). Apps that keep roles in their own store use
+  `roles::check_grant` and `roles::check_over` directly.
 - **Owner, member and guest actors.** Guests act under the resource's guest role only on
   Open resources, and never with managing permissions.
 - **Enforcement in a fixed order.** Identity, visibility, membership, role, then

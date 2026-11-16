@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `roles::check_grant` and `roles::check_over`: the rank rules without a `RoleSet`, for apps that keep their roles elsewhere.
+
 ## [0.1.0] - 2026-11-16
 
 ### Added

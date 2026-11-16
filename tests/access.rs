@@ -203,3 +203,24 @@ fn role_sets_check_and_round_trip() {
     assert_eq!(Settings::default().transport(), Transport::Sealed);
     assert_eq!(s(Visibility::Public, Access::Open).transport(), Transport::Plain);
 }
+
+#[test]
+fn rank_rules_work_without_a_role_set() {
+    use weirdnet_access::roles::{check_grant, check_over};
+    let role = |id: &str, rank, builtin| Role { id: id.into(), name: id.into(), rank, perms: vec![], builtin };
+    let owner = role("owner", 100, true);
+    let admin = role("admin", 80, false);
+    let user = role("user", 50, false);
+    let a = Actor::Member { user_id: "u1".into(), role: admin.clone() };
+    assert!(check_grant(&Actor::Owner, &owner).is_ok());
+    assert!(check_grant(&a, &owner).is_err());
+    assert!(check_grant(&a, &admin).is_err(), "not your own rank");
+    assert!(check_grant(&a, &user).is_ok());
+    assert!(check_over(&Actor::Owner, Some(&owner)).is_err(), "nobody acts on the owner");
+    assert!(check_over(&a, Some(&owner)).is_err());
+    assert!(check_over(&Actor::Owner, Some(&admin)).is_ok());
+    assert!(check_over(&a, Some(&admin)).is_err());
+    assert!(check_over(&a, Some(&user)).is_ok());
+    assert!(check_over(&a, None).is_ok(), "no role ranks lowest");
+    assert!(check_over(&Actor::Guest, None).is_err());
+}

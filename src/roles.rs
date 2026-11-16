@@ -78,6 +78,35 @@ impl Actor {
     }
 }
 
+/// May `a` give `role` to someone? Only the owner gives the builtin owner role; others give
+/// only roles ranked below their own. (The rank rule without a [`RoleSet`], for apps that
+/// keep their roles elsewhere.)
+pub fn check_grant(a: &Actor, role: &Role) -> Result<()> {
+    if role.is_owner() && a != &Actor::Owner {
+        return Err(Error::Denied("only the owner gives the owner role".into()));
+    }
+    if a != &Actor::Owner && role.rank >= a.rank() {
+        return Err(Error::Denied(format!("{} ranks as high as or above {}", role.name, a.who())));
+    }
+    Ok(())
+}
+
+/// May `a` act on (kick, change the role of) a member holding `theirs` (`None` if they have
+/// no role)? Nobody acts on the owner; others act only on members ranked below them.
+pub fn check_over(a: &Actor, theirs: Option<&Role>) -> Result<()> {
+    if theirs.is_some_and(Role::is_owner) {
+        return Err(Error::Denied("that is the owner".into()));
+    }
+    if a == &Actor::Owner {
+        return Ok(());
+    }
+    let rank = theirs.map(|r| r.rank).unwrap_or(i64::MIN);
+    if rank >= a.rank() {
+        return Err(Error::Denied(format!("they rank as high as or above {}", a.who())));
+    }
+    Ok(())
+}
+
 /// A resource's roles and its defaults for new members and guests.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RoleSet {
@@ -180,29 +209,12 @@ impl RoleSet {
 
     /// May `a` give `role` to someone?
     pub fn check_grant(&self, a: &Actor, role: &Role) -> Result<()> {
-        if role.is_owner() && a != &Actor::Owner {
-            return Err(Error::Denied("only the owner gives the owner role".into()));
-        }
-        if a != &Actor::Owner && role.rank >= a.rank() {
-            return Err(Error::Denied(format!("{} ranks as high as or above {}", role.name, a.who())));
-        }
-        Ok(())
+        check_grant(a, role)
     }
 
     /// May `a` act on a member holding `their_role` (kick, change role)?
     pub fn check_over(&self, a: &Actor, their_role: Option<&str>) -> Result<()> {
-        let theirs = their_role.and_then(|r| self.get(r));
-        if theirs.is_some_and(Role::is_owner) {
-            return Err(Error::Denied("that is the owner".into()));
-        }
-        if a == &Actor::Owner {
-            return Ok(());
-        }
-        let rank = theirs.map(|r| r.rank).unwrap_or(i64::MIN);
-        if rank >= a.rank() {
-            return Err(Error::Denied(format!("they rank as high as or above {}", a.who())));
-        }
-        Ok(())
+        check_over(a, their_role.and_then(|r| self.get(r)))
     }
 
     /// Creates a role ranked below `a`'s own (needs `roles.manage`).
