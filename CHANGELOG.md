@@ -13,3 +13,5 @@ All notable changes to this project are documented here. The format follows
 - Ranked roles with Muninn's rank rules, and the `owner_member` and `ranked` presets.
 - Owner, member and guest actors; guests never get managing permissions.
 - `decide`: identity, visibility, membership, role, then sealed or plain transport.
+
+[Unreleased]: https://github.com/WeirdBrains/weirdnet-access/compare/6cf2e0f5a71feadb3f28fa2613ac0a79925b8b25...HEAD
